@@ -1,0 +1,103 @@
+---
+title: "Simulate"
+author: "Bernice Bao"
+format: pdf
+editor: visual
+---
+
+```{r}
+#| echo: false
+
+
+# Workplace Set Up
+# Load necessary libraries
+library(ggplot2)
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Generate simulated data
+years <- 2004:2023
+num_years <- length(years)
+num_hospitals <- 5
+
+# Generate data for each hospital
+hospital_data <- matrix(0, nrow = num_years, ncol = num_hospitals)
+
+for (h in 1:num_hospitals) {
+  hospital_data[, h] <- rpois(num_years, lambda = 150 + h * 10) # Vary lambda for each hospital
+}
+
+# Convert data to data frame
+df <- data.frame(Year = rep(years, num_hospitals),
+                 Hospital = rep(1:num_hospitals, each = num_years),
+                 Deaths = as.vector(hospital_data))
+
+# Plot the simulated data
+ggplot(df, aes(x = Year, y = Deaths, color = factor(Hospital))) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Number of Cancer Deaths in Sydney Hospitals Over 20 Years",
+       x = "Year",
+       y = "Number of Deaths",
+       color = "Hospital") +
+  theme_minimal()
+
+# Perform some basic tests on the simulated data
+# Test 1: Summary statistics
+summary(df$Deaths)
+
+# Test 2: Plot of total deaths per year
+total_deaths_per_year <- aggregate(Deaths ~ Year, data = df, FUN = sum)
+ggplot(total_deaths_per_year, aes(x = Year, y = Deaths)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Total Cancer Deaths in Sydney Hospitals Over 20 Years",
+       x = "Year",
+       y = "Total Deaths") +
+  theme_minimal()
+
+# Test 3: Average deaths per hospital
+avg_deaths_per_hospital <- aggregate(Deaths ~ Hospital, data = df, FUN = mean)
+print(avg_deaths_per_hospital)
+
+# Test 4: Maximum deaths in a single year for each hospital
+max_deaths_per_hospital <- aggregate(Deaths ~ Hospital, data = df, FUN = max)
+print(max_deaths_per_hospital)
+
+# Test 5: Year with the highest number of deaths across hospitals
+max_deaths_year <- df[df$Deaths == max(df$Deaths), "Year"]
+print(max_deaths_year)
+
+# Test 6: Hospital with the highest number of deaths in the last year
+max_deaths_hospital_last_year <- df[df$Year == max(df$Year) & df$Deaths == max(df[df$Year == max(df$Year), "Deaths"]), "Hospital"]
+print(max_deaths_hospital_last_year)
+
+# Test 7: Trend analysis for each hospital
+hospital_trends <- aggregate(Deaths ~ Year + Hospital, data = df, FUN = mean)
+ggplot(hospital_trends, aes(x = Year, y = Deaths, color = factor(Hospital))) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Trend of Cancer Deaths in Sydney Hospitals Over 20 Years",
+       x = "Year",
+       y = "Number of Deaths",
+       color = "Hospital") +
+  theme_minimal()
+
+# Test 8: Correlation between hospitals
+correlation_matrix <- cor(hospital_data)
+print(correlation_matrix)
+
+# Test 9: Test for significant difference in average deaths between hospitals
+hospital_anova <- aov(Deaths ~ factor(Hospital), data = df)
+summary(hospital_anova)
+
+# Test 10: Time series analysis for total deaths
+library(forecast)
+total_deaths_ts <- ts(total_deaths_per_year$Deaths, start = 2004, end = 2023)
+deaths_forecast <- forecast(auto.arima(total_deaths_ts), h = 5)
+plot(deaths_forecast, main = "Forecast of Total Cancer Deaths in Sydney Hospitals")
+
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
