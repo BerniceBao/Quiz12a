@@ -1,9 +1,11 @@
 ---
-title: "Simulate"
+title: "Quiz 12a (Simulate + Explore)"
 author: "Bernice Bao"
 format: pdf
 editor: visual
 ---
+
+## Simulate (Question 2)
 
 ```{r}
 #| echo: false
@@ -32,16 +34,6 @@ for (h in 1:num_hospitals) {
 df <- data.frame(Year = rep(years, num_hospitals),
                  Hospital = rep(1:num_hospitals, each = num_years),
                  Deaths = as.vector(hospital_data))
-
-# Plot the simulated data
-ggplot(df, aes(x = Year, y = Deaths, color = factor(Hospital))) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Number of Cancer Deaths in Sydney Hospitals Over 20 Years",
-       x = "Year",
-       y = "Number of Deaths",
-       color = "Hospital") +
-  theme_minimal()
 
 # Perform some basic tests on the simulated data
 # Test 1: Summary statistics
@@ -100,4 +92,27 @@ plot(deaths_forecast, main = "Forecast of Total Cancer Deaths in Sydney Hospital
 
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Explore (Question 4)
+```{r}
+
+# Plot the simulated data
+ggplot(df, aes(x = Year, y = Deaths, color = factor(Hospital))) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Number of Cancer Deaths in Sydney Hospitals Over 20 Years",
+       x = "Year",
+       y = "Number of Deaths",
+       color = "Hospital") +
+  theme_minimal()
+
+# Load necessary libraries
+library(rstanarm)
+
+# Fit a simple linear regression model
+model <- stan_glm(Deaths ~ Year + factor(Hospital), data = df, family = "poisson")
+
+# Print the summary of the model
+summary(model)
+
+
+```
